@@ -1,4 +1,4 @@
-class ReaderCodeGenerator:      
+class CodeGenerators:      
     def readers_code_generator():
         unique_number = 0
         while True:
@@ -6,8 +6,18 @@ class ReaderCodeGenerator:
             yield reader_unique_code
             unique_number += 1
 
+    def book_code_generator(author, book_title):
+        author_full_name = author.split()
+        author_code = author_full_name[0][0] + author_full_name[0][-1] + author_full_name[-1][0] + author_full_name[-1][-1]
+        book_full_title = book_title.split()
+        book_code = book_full_title[0][0] + book_full_title[0][-1] + book_full_title[-1][0] + book_full_title[-1][-1]
+        unique_number = 0
+        while True:
+            unique_number += 1
+            yield author_code + book_code + str(unique_number)
 
-class ReadersNode(ReaderCodeGenerator):
+
+class ReadersNode(CodeGenerators):
     def __init__(self,data):
         self.data = data
         self.next = None
@@ -165,8 +175,12 @@ class BookLinkedList:
             pointer = pointer.next
 
 
-readers_code = ReaderCodeGenerator
-reader_code = readers_code.readers_code_generator()
+code = CodeGenerators
+reader_code = code.readers_code_generator()
+book_code = code.book_code_generator('Stanislaw Lem', 'Solaris')
+print(next(book_code))
+print(next(book_code))
+
 
 l = LibraryReader()
 l.create_reader('Basia', 'Jarok', 'bj@bj.bj')
@@ -183,7 +197,7 @@ l.delete_reader_data('Martha', 'Frun', 'frun@allert.us')
 l.delete_reader_data('Gary', 'Zo', 'gzol@areozol.air')
 l.delete_reader_data('Marko', 'Babul', 'markoB@bolal.op')
 l.print_users()
-print('=======')
+print('===========')
 l.change_reader_data('R4','Gary', 'Z+++++++', 'gzol@areozol.air')
 l.print_users()
 lb = BookLinkedList()
