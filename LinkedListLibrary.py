@@ -32,7 +32,7 @@ class LibraryReader:
 
     def create_reader(self, first_name, last_name, email):
         my_books = []
-        data = [next(reader_code), first_name, last_name, email, my_books]
+        data = [next(reader_code_generator), first_name, last_name, email, my_books]
         new_node = ReadersNode(data)
         new_node.next = self.head
         self.head = new_node
@@ -82,7 +82,7 @@ class LibraryReader:
         pointer = self.head
         while pointer != None:
             if pointer.data[1] == first_name and pointer.data[2] == last_name and pointer.data[3] == email:
-                print(pointer.data[0])
+                print(f'{first_name}`s Library Code is: {pointer.data[0]}')
                 count += 1
                 break
             pointer = pointer.next
@@ -99,7 +99,7 @@ class LibraryReader:
                 break
             pointer = pointer.next
         if count == 0:
-            print(f'Sorry Mate, there is no such ReaderCode as  in our Library {reader_code}, do you want to create an account?')
+            print(f'Sorry Mate, there is no such ReaderCode as {reader_code} in our Library, do you want to create an account?')
 
     def book_borrowing(self, reader_code, borrowed_book):
         pointer = self.head
@@ -113,7 +113,7 @@ class LibraryReader:
         pointer = self.head
         while pointer != None:
             if pointer.data[0] == reader_code:
-                print(f'dear {pointer.data[1]}, you have {len(pointer.data[4])} book(s) to return: \n {pointer.data[4]}')
+                print(f'dear {pointer.data[1]}, you have {len(pointer.data[4][0])} book(s) to return: \n {pointer.data[4][0]}')
                 break
             pointer = pointer.next
 
@@ -133,7 +133,14 @@ class BookLinkedList:
         return self.data
 
     def add_book_to_library(self, author, book_title, how_many_copies):
-        data = [author, book_title, how_many_copies]
+        book_all_copies_code = []
+        borrowed_copies_code = []
+        book_code = code.book_code_generator(author, book_title)
+        for _ in range(int(how_many_copies)):
+            single_book_code = next(book_code)
+            book_all_copies_code.append(single_book_code)
+        
+        data = [author, book_title, book_all_copies_code, borrowed_copies_code]
         new_book_node = BookNode(data)
         if self.head == None:
             self.head = self.tail = new_book_node
@@ -144,71 +151,80 @@ class BookLinkedList:
         new_book_node.prev = self.tail
         new_book_node.next = None
         self.tail = new_book_node
+        print(f'Succes. {how_many_copies} copies of book \"{book_title}\" by {author.upper()} added to the Library')
 
     def serch_book(self, author, book_title):
         pointer = self.head
         while pointer != None:
             if pointer.data[0] == author and pointer.data[1] == book_title:
-                print(f'Book found. There are {pointer.data[2]} copie(s) in the Library')
+                print(f'Book found. There are {len(pointer.data[3])} of all {len(pointer.data[2])} Library copies')
                 break
             pointer = pointer.next
 
     def book_borrow(self, author, book_title, reader_code):
+        is_book_borrowed = 0
         borrowed_book = []
         pointer = self.tail
         while pointer != None:
-            if pointer.data[0] == author and pointer.data[1] == book_title and int(pointer.data[2]) == 0:
-                print(f'Sorry but thera are no more copies of {book_title} in the Library')
+            if pointer.data[0] == author and pointer.data[1] == book_title and (len(pointer.data[2]) - len(pointer.data[3])) == 0:
+                print(f'Sorry Reader with code {reader_code}, but thera are no more copies of \"{book_title}\" in the Library')
                 break
-            if pointer.data[0] == author and pointer.data[1] == book_title and int(pointer.data[2]) > 0:
-                pointer.data[2] -= 1
-                borrowed_book = [author, book_title]
+            if pointer.data[0] == author and pointer.data[1] == book_title and (len(pointer.data[2]) - len(pointer.data[3])) > 0:
+                for _ in range(len(pointer.data[2])):
+                    if pointer.data[2][is_book_borrowed] not in pointer.data[3]:   
+                        pointer.data[3].append(pointer.data[2][is_book_borrowed])
+                        print(f'You, with reader code {reader_code}, have borrowed book \"{book_title}\" by {author} with book_code: {pointer.data[2][is_book_borrowed]}')
+                        borrowed_book.append([author, book_title, pointer.data[2][is_book_borrowed]])
+                    else:
+                        is_book_borrowed +=1
                 l.book_borrowing(reader_code, borrowed_book)
-                print(borrowed_book)
                 break
             pointer = pointer.prev
-     
+            
     def print_library_books(self):
         pointer = self.head
         while pointer != None:
-            print(pointer.data[0], pointer.data[1])
+            print(f'{pointer.data[0].upper()} book: \"{pointer.data[1]}\", all copies: {len(pointer.data[2])}, copies beeing borrowed: {len(pointer.data[3])}')
             pointer = pointer.next
 
 
 code = CodeGenerators
-reader_code = code.readers_code_generator()
-book_code = code.book_code_generator('Stanislaw Lem', 'Solaris')
-print(next(book_code))
-print(next(book_code))
-
-
+reader_code_generator = code.readers_code_generator()
 l = LibraryReader()
+lb = BookLinkedList()
+
 l.create_reader('Basia', 'Jarok', 'bj@bj.bj')
 l.create_reader('Marko', 'Babul', 'markoB@bolal.op')
 l.create_reader('Jahun', 'Gardias', 'jahunG@op.com')
 l.create_reader('Martha', 'Frun', 'frun@allert.us')
 l.create_reader('Gary', 'Zol', 'gzol@areozol.air')
-l.print_users()
-l.find_reader_by_code('R3')
-l.find_reader_code('Marko', 'Babul', 'markoB@bolal.op')
+l.find_reader_code('Jahun', 'Gardias', 'jahunG@op.com')
 
+lb.add_book_to_library('Stanislaw Lem', 'Solaris', 4)
+lb.add_book_to_library('Stev Erikson', 'Gardens of the Moon', 1)
+lb.add_book_to_library('Samantha Shannon', 'The Priory of the Orange Tree', 5)
+lb.print_library_books()
+print('++++++++')
+lb.serch_book('Samantha Shannon', 'The Priory of the Orange Tree')
+print('++++++++')
+lb.book_borrow('Samantha Shannon', 'The Priory of the Orange Tree', 'R2')
+lb.book_borrow('Samantha Shannon', 'The Priory of the Orange Tree', 'R4')
+lb.book_borrow('Samantha Shannon', 'The Priory of the Orange Tree', 'R3')
+lb.book_borrow('Samantha Shannon', 'The Priory of the Orange Tree', 'R2')
+lb.print_library_books()
+l.print_users()
+l.what_book_to_return('R2')
+
+
+'''print('++++++++')
+l.find_reader_code('Marko', 'Babul', 'markoB@bolal.op')
+lb.print_library_books()
+lb.serch_book('Samantha Shannon', 'The Priory of the Orange Tree')
+l.what_book_to_return('R2')
+l.change_reader_data('R4','Gary', 'Z+++++++', 'gzol@areozol.air')
+print('++++++++')
 l.delete_reader_data('Basia', 'Jarok', 'bj@bj.bj')
 l.delete_reader_data('Martha', 'Frun', 'frun@allert.us')
 l.delete_reader_data('Gary', 'Zo', 'gzol@areozol.air')
 l.delete_reader_data('Marko', 'Babul', 'markoB@bolal.op')
-l.print_users()
-print('===========')
-l.change_reader_data('R4','Gary', 'Z+++++++', 'gzol@areozol.air')
-l.print_users()
-lb = BookLinkedList()
-lb.add_book_to_library('Stanislaw Lem', 'Solaris', 4)
-lb.add_book_to_library('Stev Erikson', 'Gardens of the Moon', 1)
-lb.add_book_to_library('Samantha Shannon', 'The Priory of the Orange Tree', 2)
-lb.print_library_books()
-lb.serch_book('Samantha Shannon', 'The Priory of the Orange Tree')
-lb.book_borrow('Samantha Shannon', 'The Priory of the Orange Tree', 'R2')
-print('++++++++')
-lb.print_library_books()
-lb.serch_book('Samantha Shannon', 'The Priory of the Orange Tree')
-
-l.what_book_to_return('R2')
+l.print_users()'''
