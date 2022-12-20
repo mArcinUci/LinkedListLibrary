@@ -108,6 +108,17 @@ class LibraryReader:
                 pointer.data[4].append(borrowed_book)
                 break
             pointer = pointer.next
+
+    def book_returning(self, reader_code, author, book_title):
+        pointer = self.head
+        while pointer != None:
+            if pointer.data[0] == reader_code:
+                for value_list in pointer.data[4]:
+                    for value in value_list:
+                        if value[0] == author and value[1] == book_title:
+                            value_list.remove(value)
+                            return value[2]
+            pointer = pointer.next
     
     def what_book_to_return(self, reader_code):
         pointer = self.head
@@ -180,7 +191,10 @@ class BookLinkedList:
                 l.book_borrowing(reader_code, borrowed_book)
                 break
             pointer = pointer.prev
-            
+
+    def book_back(self,reader_code, author, book_title):
+        pass
+
     def print_library_books(self):
         pointer = self.head
         while pointer != None:
@@ -214,6 +228,8 @@ lb.book_borrow('Samantha Shannon', 'The Priory of the Orange Tree', 'R2')
 lb.print_library_books()
 l.print_users()
 l.what_book_to_return('R2')
+print('++++++++')
+print(l.book_returning('R2','Samantha Shannon', 'The Priory of the Orange Tree'))
 
 
 '''print('++++++++')
