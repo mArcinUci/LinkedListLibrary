@@ -45,6 +45,7 @@ class LibraryReader:
             count += 1
         if self.head.data[1] == first_name and self.head.data[2] == last_name and self.head.data[3] == email and len(self.head.data[4]) == 0:
             self.head = self.head.next
+            print(f'{first_name}`s data deleted')
             count +=1
     
         pointer = self.head
@@ -55,6 +56,7 @@ class LibraryReader:
                 break
             if pointer.next.data[1] == first_name and pointer.next.data[2] == last_name and pointer.next.data[3] == email and len(pointer.next.data[4]) == 0:
                 pointer.next = pointer.next.next
+                print(f'{first_name}`s data deleted')
                 count += 1
                 break
             pointer = pointer.next
@@ -68,6 +70,7 @@ class LibraryReader:
                 pointer.data[1] = new_first_name
                 pointer.data[2] = new_last_name
                 pointer.data[3] = new_email
+                print(f'Succes. New data: {new_first_name} {new_last_name}, with email: {new_email}')
                 break
             pointer = pointer.next
 
@@ -75,7 +78,6 @@ class LibraryReader:
         pointer = self.head
         while pointer != None:
             print(f'Reader: {pointer.data[1]} {pointer.data[2]}, with email: {pointer.data[3]} and Readers Code: {pointer.data[0]}')
-            print(pointer.data[4])
             pointer = pointer.next
 
     def find_reader_code(self, first_name, last_name, email):
@@ -185,6 +187,7 @@ class BookLinkedList:
                 pointer.data[3].append([codes_available[0], reader_code])
                 borrowed_book_data.append([author, book_title, codes_available[0]])
                 l.book_borrowing(reader_code, borrowed_book_data)
+                print(f'Confirmed, book {book_title} is now saved as borrowed')
                 break
             pointer = pointer.prev
 
@@ -195,7 +198,8 @@ class BookLinkedList:
                 l.book_returning(reader_code, author, book_title)
                 for value in pointer.data[3]:
                     if value[1] == reader_code:
-                        pointer.data[3].remove(value)   
+                        pointer.data[3].remove(value)
+                        print(f'Confirmed, book {book_title} is now back to the Library')  
             pointer = self.tail
 
     def print_library_books(self):
