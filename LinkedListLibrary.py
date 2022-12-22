@@ -113,18 +113,17 @@ class LibraryReader:
         pointer = self.head
         while pointer != None:
             if pointer.data[0] == reader_code:
-                for value_list in pointer.data[4]:
-                    for value in value_list:
-                        if value[0] == author and value[1] == book_title:
-                            value_list.remove(value)
-                            return value[2]
+                for value in pointer.data[4]:
+                    if value[0][0] == author and value[0][1] == book_title:
+                        pointer.data[4].remove(value)
+                        break              
             pointer = pointer.next
     
     def what_book_to_return(self, reader_code):
         pointer = self.head
         while pointer != None:
             if pointer.data[0] == reader_code:
-                print(f'dear {pointer.data[1]}, you have {len(pointer.data[4][0])} book(s) to return: \n {pointer.data[4][0]}')
+                print(f'dear {pointer.data[1]}, you have {len(pointer.data[4])} book(s) to return: \n {pointer.data[4]}')
                 break
             pointer = pointer.next
 
@@ -145,13 +144,13 @@ class BookLinkedList:
 
     def add_book_to_library(self, author, book_title, how_many_copies):
         book_all_copies_code = []
-        borrowed_copies_code = []
+        borrowed_copies_codes = []
         book_code = code.book_code_generator(author, book_title)
         for _ in range(int(how_many_copies)):
             single_book_code = next(book_code)
             book_all_copies_code.append(single_book_code)
         
-        data = [author, book_title, book_all_copies_code, borrowed_copies_code]
+        data = [author, book_title, book_all_copies_code, borrowed_copies_codes]
         new_book_node = BookNode(data)
         if self.head == None:
             self.head = self.tail = new_book_node
@@ -168,32 +167,35 @@ class BookLinkedList:
         pointer = self.head
         while pointer != None:
             if pointer.data[0] == author and pointer.data[1] == book_title:
-                print(f'Book found. There are {len(pointer.data[3])} of all {len(pointer.data[2])} Library copies')
+                print(f'Book found. Out of all {len(pointer.data[2])} Library copies, {len(pointer.data[3])} were borrowed')
                 break
             pointer = pointer.next
 
     def book_borrow(self, author, book_title, reader_code):
-        is_book_borrowed = 0
-        borrowed_book = []
+        borrowed_book_data = []
         pointer = self.tail
         while pointer != None:
             if pointer.data[0] == author and pointer.data[1] == book_title and (len(pointer.data[2]) - len(pointer.data[3])) == 0:
                 print(f'Sorry Reader with code {reader_code}, but thera are no more copies of \"{book_title}\" in the Library')
                 break
             if pointer.data[0] == author and pointer.data[1] == book_title and (len(pointer.data[2]) - len(pointer.data[3])) > 0:
-                for _ in range(len(pointer.data[2])):
-                    if pointer.data[2][is_book_borrowed] not in pointer.data[3]:   
-                        pointer.data[3].append(pointer.data[2][is_book_borrowed])
-                        print(f'You, with reader code {reader_code}, have borrowed book \"{book_title}\" by {author} with book_code: {pointer.data[2][is_book_borrowed]}')
-                        borrowed_book.append([author, book_title, pointer.data[2][is_book_borrowed]])
-                    else:
-                        is_book_borrowed +=1
-                l.book_borrowing(reader_code, borrowed_book)
+                codes_taken = [taken_book_code[0] for taken_book_code in pointer.data[3]]
+                codes_available = [available_book_code for available_book_code in pointer.data[2] if available_book_code not in codes_taken]
+                pointer.data[3].append([codes_available[0], reader_code])
+                borrowed_book_data.append([author, book_title, codes_available[0]])
+                l.book_borrowing(reader_code, borrowed_book_data)
                 break
             pointer = pointer.prev
 
     def book_back(self,reader_code, author, book_title):
-        pass
+        pointer = self.tail
+        while pointer != None:
+            if pointer.data[0] == author and pointer.data[1] == book_title:
+                l.book_returning(reader_code, author, book_title)
+                for value in pointer.data[3]:
+                    if value[1] == reader_code:
+                        pointer.data[3].remove(value)   
+            pointer = self.tail
 
     def print_library_books(self):
         pointer = self.head
@@ -206,41 +208,3 @@ code = CodeGenerators
 reader_code_generator = code.readers_code_generator()
 l = LibraryReader()
 lb = BookLinkedList()
-
-l.create_reader('Basia', 'Jarok', 'bj@bj.bj')
-l.create_reader('Marko', 'Babul', 'markoB@bolal.op')
-l.create_reader('Jahun', 'Gardias', 'jahunG@op.com')
-l.create_reader('Martha', 'Frun', 'frun@allert.us')
-l.create_reader('Gary', 'Zol', 'gzol@areozol.air')
-l.find_reader_code('Jahun', 'Gardias', 'jahunG@op.com')
-
-lb.add_book_to_library('Stanislaw Lem', 'Solaris', 4)
-lb.add_book_to_library('Stev Erikson', 'Gardens of the Moon', 1)
-lb.add_book_to_library('Samantha Shannon', 'The Priory of the Orange Tree', 5)
-lb.print_library_books()
-print('++++++++')
-lb.serch_book('Samantha Shannon', 'The Priory of the Orange Tree')
-print('++++++++')
-lb.book_borrow('Samantha Shannon', 'The Priory of the Orange Tree', 'R2')
-lb.book_borrow('Samantha Shannon', 'The Priory of the Orange Tree', 'R4')
-lb.book_borrow('Samantha Shannon', 'The Priory of the Orange Tree', 'R3')
-lb.book_borrow('Samantha Shannon', 'The Priory of the Orange Tree', 'R2')
-lb.print_library_books()
-l.print_users()
-l.what_book_to_return('R2')
-print('++++++++')
-print(l.book_returning('R2','Samantha Shannon', 'The Priory of the Orange Tree'))
-
-
-'''print('++++++++')
-l.find_reader_code('Marko', 'Babul', 'markoB@bolal.op')
-lb.print_library_books()
-lb.serch_book('Samantha Shannon', 'The Priory of the Orange Tree')
-l.what_book_to_return('R2')
-l.change_reader_data('R4','Gary', 'Z+++++++', 'gzol@areozol.air')
-print('++++++++')
-l.delete_reader_data('Basia', 'Jarok', 'bj@bj.bj')
-l.delete_reader_data('Martha', 'Frun', 'frun@allert.us')
-l.delete_reader_data('Gary', 'Zo', 'gzol@areozol.air')
-l.delete_reader_data('Marko', 'Babul', 'markoB@bolal.op')
-l.print_users()'''
