@@ -36,6 +36,7 @@ class LibraryReader:
         new_node = ReadersNode(data)
         new_node.next = self.head
         self.head = new_node
+        print(f'Account created. Reader {first_name} {last_name} succcesfully added to the Library')
 
     def delete_reader_data(self, first_name, last_name, email):
         count = 0
